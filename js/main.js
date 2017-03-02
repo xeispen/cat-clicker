@@ -27,9 +27,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
         getAllCats: function() {
             return JSON.parse(localStorage.cats);
+        },
+
+        increment: function(cat) {
+            var data = model.getAllCats();
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].name === cat) {
+                    data[i].clickCt ++;
+                    var catMod = data[i];
+                };
+            };
+            localStorage.cats = JSON.stringify(data);
+            // Refresh picture
+            octopus.refresh(catMod);
         }
-
-
     };
 
 
@@ -44,12 +55,23 @@ document.addEventListener("DOMContentLoaded", function(event) {
                     clickCt: 0
                 });
             }
-            //listview.renderList();
         },
 
         // Returns JavaScript Object of Cats from localStorage.cats
         getCats: function() {
             return model.getAllCats();
+        },
+
+        pushCt: function() {
+            //get the specific cat
+            var catName = catview.catshown();
+            //call function to model
+            model.increment(catName);
+        },
+
+        refresh: function (cat) {
+            listview.bindlist();
+            catview.renderCat(cat);
         },
 
         init: function () {
@@ -68,16 +90,27 @@ document.addEventListener("DOMContentLoaded", function(event) {
             this.catUl = document.getElementById("cat-list");
             // Get cats back from local storage to process
             // Executes a function to add Event listener
+            listview.bindlist();
+        },
+
+        bindlist: function() {
+            listview.clearlist();
             octopus.getCats().forEach( function(cat) {
-                // Create list element use this.var to store
-                var catItem = document.createElement('li');
-                catItem.textContent = cat.name;
-                catItem.addEventListener('click', (function() {
-                    // Call renderCat
-                    return catview.renderCat(cat);
-                }))
+                    // Create list element use this.var to store
+                    var catItem = document.createElement('li');
+                    catItem.textContent = cat.name;
+                    // Assigns event listener to cat list item
+                    catItem.addEventListener('click', (function() {
+                        // Call renderCat function when the item is clicked
+                        return catview.renderCat(cat);
+                    }));
                 listview.render(catItem);
-            })
+            });
+        },
+
+        clearlist: function() {
+            document.getElementById("cat-list").innerHTML = '';
+            console.log("Cleared");
         },
 
         render: function(item) {
@@ -99,16 +132,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
             catview.init();
         },
 
+        // Init method
         init: function() {
             var catPic = document.getElementById("cat-pic");
-            catPic.addEventListener('click', catview.log);
+            catPic.addEventListener('click', catview.increment);
         },
 
-        log: function() {
-            console.log("hello there");
+        increment: function() {
+            octopus.pushCt();
+        },
+
+        catshown: function() {
+            return document.getElementById("cat-header").innerHTML;
         }
-
-
 
     };
 
